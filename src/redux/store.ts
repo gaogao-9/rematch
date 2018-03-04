@@ -2,26 +2,24 @@
 import { applyMiddleware, createStore as _createStore, Middleware, Reducer, Store, StoreCreator } from 'redux'
 import { Config, Model } from '../../typings/rematch'
 import { pluginMiddlewares } from '../core'
+import { addModel } from '../model'
 import { composeEnhancers } from './devtools'
 import { createModelReducer, createRootReducer, mergeReducers } from './reducers'
-
-export let store: Store<any>
-let rootReducers
 
 export const initStore = ({ redux }: Config): Store<any> => {
   const initialState: any = typeof redux.initialState === 'undefined' ? {} : redux.initialState
   const createStore: StoreCreator = redux.createStore || _createStore
-  rootReducers = redux.rootReducers
+  const rootReducers = redux.rootReducers
   const rootReducer: Reducer<any> = createRootReducer(rootReducers)
   const middlewareList: Middleware[] = [...pluginMiddlewares, ...(redux.middlewares || [])]
   const middlewares = applyMiddleware(...middlewareList)
   const enhancers = [redux.devtoolOptions, ...(redux.enhancers || [])]
   const composedEnhancers = composeEnhancers(...enhancers)(middlewares)
-  store = createStore(rootReducer, initialState, composedEnhancers)
+  const store: Store<any> = createStore(rootReducer, initialState, composedEnhancers)
+  store.model = (model: Model): void => {
+    addModel(model)
+    mergeReducers(createModelReducer(model))
+    store.replaceReducer(createRootReducer(rootReducers))
+  }
   return store
-}
-
-export const createReducersAndUpdateStore = (model: Model): void => {
-  mergeReducers(createModelReducer(model))
-  store.replaceReducer(createRootReducer(rootReducers))
 }

@@ -14,7 +14,6 @@ import { dispatch, model, init, getState } from '@rematch/core'
   - [models](#models)
   - [plugins](#plugins)
   - [redux](#redux)
-- [getState](#getState)
 
 ## dispatch
 
@@ -69,9 +68,11 @@ init({
 ```
 
 ### Lazy-loading 
-It's possible to lazy-load models and merge them into Rematch after `init` has been called.
+It's possible to lazy-load models and merge them into Rematch after `init` has been called. Use `store.model`.
+
+
 ```js
-import { init, model } from '@rematch/core'
+import { init } from '@rematch/core'
 
 const store = init({
   models: {
@@ -84,7 +85,7 @@ store.getState()
 
 
 // later on
-model({ name: 'countB', state: 99 })
+store.model({ name: 'countB', state: 99 })
 
 store.getState()
 // { count: 0, countB: state: 99 }
@@ -245,13 +246,3 @@ There are situations where you might want to access Redux directly. You may want
 - create a custom plugin
 
 For a complete summary of all redux options, see the [init Redux API](./reduxApi.md).
-
-## getState
-
-```js
-import { getState } from '@rematch/core'
-
-const state = getState()
-```
-
-Not recommended for common use, but an easy way to access the store's state.
