@@ -30,10 +30,13 @@ const effectsPlugin: PluginCreator = {
     },
     middleware: <S>(store: MiddlewareAPI<S>) => (next: Dispatch<S>) => async (action: Action) => {
         // async/await acts as promise middleware
-        const result = (action.type in effects)
-          ? await effects[action.type](action.payload, store.getState(), action.meta)
-          : await next(action)
-        return result
+        if(!(action.type in effects)) {
+          return await next(action);
+        }
+        
+        for await(const [dispatcher, ...args] of effects[action.type](action.payload, store.getState(), action.meta)) {
+          dispatcher(...args);
+        }
     },
   }),
 }
